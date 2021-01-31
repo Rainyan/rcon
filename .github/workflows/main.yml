@@ -21,10 +21,19 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Configure CMake
-      working-directory: ${{github.workspace}}/build
+    - name: Update system
       shell: bash
-      run: cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=/usr
+      run: |
+        sudo apt-get update
+        sudo apt-get install build-essential cmake check libbsd-dev libglib2.0-dev
+
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=/usr
 
     - name: Make
       working-directory: ${{github.workspace}}/build

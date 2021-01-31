@@ -44,7 +44,7 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: bash
       run: |
-        zip rcon.zip ./build/rcon
+        zip rcon.zip LICENSE ./build/rcon
     
     - name: Create Release
       id: create_release

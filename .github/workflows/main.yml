@@ -32,6 +32,7 @@ jobs:
       shell: bash
       run: |
         mkdir build
+        cp ./LICENSE ./build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=/usr
 
@@ -44,7 +45,7 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: bash
       run: |
-        zip rcon.zip LICENSE ./build/rcon
+        zip rcon.zip ./build/LICENSE ./build/rcon
     
     - name: Create Release
       id: create_release

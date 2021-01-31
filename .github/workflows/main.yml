@@ -1,0 +1,61 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+name: Create Release
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=/usr
+
+    - name: Make
+      working-directory: ${{github.workspace}}/build
+      shell: bash
+      run: make
+
+    - name: Archive the Build
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: |
+        zip rcon.zip ./build/rcon
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}-${{ runner.os }}
+        release_name: Release (${{runner.os}}) ${{ github.ref }}
+        body: Automated release for ${{runner.os}}.
+        draft: true
+        prerelease: true
+
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ${{github.workspace}}/rcon.zip
+        asset_name: rcon.zip
+        asset_content_type: application/zip
